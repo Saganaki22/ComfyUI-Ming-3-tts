@@ -2,6 +2,8 @@
 
 English | [简体中文](README_ZH.md)
 
+<img width="1516" height="892" alt="Screenshot 2026-10-20 021200" src="https://github.com/user-attachments/assets/260b619d-a5f0-489a-8380-e53bab1b66c6" />
+
 Native ComfyUI port of [Ming-3.0-tts](https://github.com/inclusionAI/Ming-3.0-tts), supporting 0.5B and Tiny 9B speech generation.
 
 ## Quick start
