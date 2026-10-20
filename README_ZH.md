@@ -2,6 +2,8 @@
 
 [English](README.md) | 简体中文
 
+<img width="1516" height="892" alt="Screenshot 2026-10-20 021200" src="https://github.com/user-attachments/assets/260b619d-a5f0-489a-8380-e53bab1b66c6" />
+
 [Ming-3.0-tts](https://github.com/inclusionAI/Ming-3.0-tts) 的原生 ComfyUI 移植，支持 0.5B 和 Tiny 9B 语音生成。
 
 ## 快速开始
