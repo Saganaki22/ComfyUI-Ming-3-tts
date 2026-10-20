@@ -145,16 +145,6 @@ New-Item -ItemType Junction -Path 'C:\Users\drbaph\Documents\ComfyUI\models\chec
 
 Whisper also discovers linked folders and `whisper`/`audio_encoders` folders in mapped model trees. Its new downloads remain in the running installation's `models/whisper`. New Ming downloads always use the running installation's `models/checkpoints`, even when an extra path is marked as the default.
 
-### Loading and system RAM
-
-INT8 ConvRot weights are already saved in ComfyUI's native quantized format. Loading wraps the saved INT8 data and scales; it does not expand the whole checkpoint to BF16 in RAM. Floating-point weights are cast to the selected compute dtype where needed. Activations and generation caches depend on the current input and cannot be saved as a replacement checkpoint.
-
-The loader uses `comfy.utils.load_torch_file` and passes ComfyUI's detected disk-speed policy to the model patcher. With AIMDO enabled on fast storage, file-backed staging avoids retaining a full pinned CPU copy alongside resident VRAM weights. Slow storage or VRAM pressure can still require RAM caching. The normal ComfyUI fast-disk/high-RAM settings are respected; this node does not change them. Dtype conversions still require new storage. No additional checkpoint conversion is needed.
-
-An isolated Tiny INT8 comparison on the RTX 5090 at 10 flow steps measured process resident memory after generation at 18.67 GiB before this integration and 2.52 GiB afterward. Private resident memory (USS) fell from 10.37 to 2.27 GiB; Windows private committed memory fell from 32.70 to 14.42 GiB. The updated process peaked at 2.53 GiB resident memory across initial generation, repeat generation and offload/reload checks. All three outputs were bit-identical to the baseline. A short 0.5B check also matched exactly, using 1.93 GiB resident / 1.71 GiB USS. These measurements include the standalone Python process and are not total-system or general minimum-RAM guarantees.
-
-This is not RAM-free SSD-to-VRAM loading: Windows file caching, transfer buffers and offloading can still use system memory. Saving another weight format does not remove those requirements. NVIDIA's [GPUDirect Storage](https://developer.nvidia.com/gpudirect-storage) can bypass CPU bounce buffers on supported systems, but is not supported on Windows and is not the I/O path used by this node.
-
 ## Nodes
 
 | Node | Purpose |

@@ -156,14 +156,6 @@ New-Item -ItemType Junction -Path '.\models\checkpoints\Ming-3.0-tts-tiny-9b-int
 
 优先使用已找到的本地模型。新的 Ming 下载始终写入当前安装的 `models/checkpoints`，新的 Whisper 下载写入 `models/whisper`；不会因为额外路径被标记为默认目录而写入共享盘。
 
-### 系统内存
-
-INT8 权重已经保存为 ComfyUI 原生量化格式，无需再次转换。加载时不会把整个模型展开为 BF16。激活、生成缓存和不同计算 dtype 所需的转换仍会使用内存。
-
-加载器使用 ComfyUI 原生文件加载和磁盘速度策略。在快速存储和 AIMDO 路径上，文件映射可避免在显存权重旁长期保留一份完整的 pinned CPU 副本。慢速存储、显存压力或显式 high-RAM 设置仍可能需要 RAM 缓存。
-
-RTX 5090 的一次独立 Tiny INT8 对比中，生成后的进程常驻内存从 18.67 GiB 降到 2.52 GiB，私有常驻内存 USS 从 10.37 降到 2.27 GiB，Windows 私有提交内存从 32.70 降到 14.42 GiB。重复生成及卸载/重新加载结果与基线逐位一致。这不是最低内存保证，也不是无需 RAM 的 SSD 直达显存；系统文件缓存、传输缓冲和卸载仍使用内存。
-
 ## 节点与任务
 
 | 节点 | 用途 |
