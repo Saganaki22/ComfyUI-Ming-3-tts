@@ -1,0 +1,241 @@
+{
+  "id": "1a1938d5-066f-5b4b-adea-61c796550f85",
+  "revision": 0,
+  "last_node_id": 5,
+  "last_link_id": 2,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "MarkdownNote",
+      "title": "Workflow guide",
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        520,
+        780
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "# Design a voice\n\n[Custom node](https://github.com/Saganaki22/ComfyUI-Ming-3-tts) · [Model files](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/tree/main/checkpoints)\n\n`voice_design` creates a voice from the **style** description. No recording or transcript is required. Describe vocal character, age, accent and tone, then put the words to speak in **text**. Change style while keeping seed 42 fixed to compare voices.\n\n## Generation settings\n- **seed 42 / fixed** keeps the seed unchanged between runs.\n- **cfg 2** controls guidance. **flow_steps 10** sets solver work per chunk.\n- **temperature 0** disables extra stochastic flow noise; `sigma` matters when temperature is above zero.\n- **max_steps 250** caps audio chunks at about 20 seconds; the model can stop earlier. It does not set speaking speed or force a duration.\n- **trim** removes trailing quiet audio. The terminal shows chunk progress, it/s and generation time.\n- **Save Audio** previews the result and writes FLAC under `ComfyUI/output/ming_tts/`.\n"
+      ],
+      "widgets_values_named": {
+        "text": "# Design a voice\n\n[Custom node](https://github.com/Saganaki22/ComfyUI-Ming-3-tts) · [Model files](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/tree/main/checkpoints)\n\n`voice_design` creates a voice from the **style** description. No recording or transcript is required. Describe vocal character, age, accent and tone, then put the words to speak in **text**. Change style while keeping seed 42 fixed to compare voices.\n\n## Generation settings\n- **seed 42 / fixed** keeps the seed unchanged between runs.\n- **cfg 2** controls guidance. **flow_steps 10** sets solver work per chunk.\n- **temperature 0** disables extra stochastic flow noise; `sigma` matters when temperature is above zero.\n- **max_steps 250** caps audio chunks at about 20 seconds; the model can stop earlier. It does not set speaking speed or force a duration.\n- **trim** removes trailing quiet audio. The terminal shows chunk progress, it/s and generation time.\n- **Save Audio** previews the result and writes FLAC under `ComfyUI/output/ming_tts/`.\n"
+      },
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 2,
+      "type": "MarkdownNote",
+      "title": "Model files and setup",
+      "pos": [
+        0,
+        820
+      ],
+      "size": [
+        520,
+        940
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "## Ming model downloads\n\n- [Ming-3.0-tts-0.5b](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/resolve/main/checkpoints/Ming-3.0-tts-0.5b/model.safetensors?download=true)\n- [Ming-3.0-tts-0.5b-int8-convrot](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/resolve/main/checkpoints/Ming-3.0-tts-0.5b-int8-convrot/ming-3-tts-0.5b-int8-convrot.safetensors?download=true)\n- [Ming-3.0-tts-tiny-9b](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/resolve/main/checkpoints/Ming-3.0-tts-tiny-9b/ming-3-tts-tiny-9b.safetensors?download=true)\n- [Ming-3.0-tts-tiny-9b-int8-convrot](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/resolve/main/checkpoints/Ming-3.0-tts-tiny-9b-int8-convrot/ming-3-tts-tiny-9b-int8-convrot.safetensors?download=true)\n\n## Model folders\nPlace each selected weight in its matching folder:\n```\nComfyUI/models/checkpoints/\n├── Ming-3.0-tts-0.5b/model.safetensors\n├── Ming-3.0-tts-0.5b-int8-convrot/\n│   └── ming-3-tts-0.5b-int8-convrot.safetensors\n├── Ming-3.0-tts-tiny-9b/\n│   └── ming-3-tts-tiny-9b.safetensors\n└── Ming-3.0-tts-tiny-9b-int8-convrot/\n    └── ming-3-tts-tiny-9b-int8-convrot.safetensors\n```\nOnly the chosen model is needed. Keep this custom node's bundled `assets` folder installed; it supplies config/tokenizer files and CampPlus.\n\n**download_if_missing** is off initially. Enable it to authorize downloading the selected missing model. Existing local models, registered extra paths, symlinks and junctions work.\n\n**0.5B** is the smaller option. **Tiny 9B** is required for native podcast dialogue. INT8 reduces weight storage and memory; it is not a guaranteed speedup. Precision controls computation, not the saved weight format. `auto` follows ComfyUI's device/dtype selection.\n\nTiny uses optional FLA kernels on compatible CUDA systems, otherwise the slower PyTorch fallback. The terminal reports the backend used. Output is mono 44.1 kHz.\n"
+      ],
+      "widgets_values_named": {
+        "text": "## Ming model downloads\n\n- [Ming-3.0-tts-0.5b](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/resolve/main/checkpoints/Ming-3.0-tts-0.5b/model.safetensors?download=true)\n- [Ming-3.0-tts-0.5b-int8-convrot](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/resolve/main/checkpoints/Ming-3.0-tts-0.5b-int8-convrot/ming-3-tts-0.5b-int8-convrot.safetensors?download=true)\n- [Ming-3.0-tts-tiny-9b](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/resolve/main/checkpoints/Ming-3.0-tts-tiny-9b/ming-3-tts-tiny-9b.safetensors?download=true)\n- [Ming-3.0-tts-tiny-9b-int8-convrot](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/resolve/main/checkpoints/Ming-3.0-tts-tiny-9b-int8-convrot/ming-3-tts-tiny-9b-int8-convrot.safetensors?download=true)\n\n## Model folders\nPlace each selected weight in its matching folder:\n```\nComfyUI/models/checkpoints/\n├── Ming-3.0-tts-0.5b/model.safetensors\n├── Ming-3.0-tts-0.5b-int8-convrot/\n│   └── ming-3-tts-0.5b-int8-convrot.safetensors\n├── Ming-3.0-tts-tiny-9b/\n│   └── ming-3-tts-tiny-9b.safetensors\n└── Ming-3.0-tts-tiny-9b-int8-convrot/\n    └── ming-3-tts-tiny-9b-int8-convrot.safetensors\n```\nOnly the chosen model is needed. Keep this custom node's bundled `assets` folder installed; it supplies config/tokenizer files and CampPlus.\n\n**download_if_missing** is off initially. Enable it to authorize downloading the selected missing model. Existing local models, registered extra paths, symlinks and junctions work.\n\n**0.5B** is the smaller option. **Tiny 9B** is required for native podcast dialogue. INT8 reduces weight storage and memory; it is not a guaranteed speedup. Precision controls computation, not the saved weight format. `auto` follows ComfyUI's device/dtype selection.\n\nTiny uses optional FLA kernels on compatible CUDA systems, otherwise the slower PyTorch fallback. The terminal reports the backend used. Output is mono 44.1 kHz.\n"
+      },
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 3,
+      "type": "MingLoadModel",
+      "title": "Load 0.5B INT8",
+      "pos": [
+        600,
+        0
+      ],
+      "size": [
+        340,
+        190
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MING_TTS_MODEL",
+          "type": "MING_TTS_MODEL",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MingLoadModel",
+        "cnr_id": "comfyui-ming-3-tts",
+        "ver": "1.0.0"
+      },
+      "widgets_values": [
+        "Ming-3.0-tts-0.5b-int8-convrot",
+        "auto",
+        "auto",
+        false
+      ],
+      "widgets_values_named": {
+        "model": "Ming-3.0-tts-0.5b-int8-convrot",
+        "precision": "auto",
+        "device": "auto",
+        "download_if_missing": false
+      }
+    },
+    {
+      "id": 4,
+      "type": "MingGenerate",
+      "title": "Generate: voice_design",
+      "pos": [
+        1020,
+        0
+      ],
+      "size": [
+        470,
+        740
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MING_TTS_MODEL",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MingGenerate",
+        "cnr_id": "comfyui-ming-3-tts",
+        "ver": "1.0.0"
+      },
+      "widgets_values": [
+        "Hello there. Take a moment, get comfortable, and let us begin.",
+        "voice_design",
+        "A warm, clear adult female voice with a relaxed conversational delivery and a neutral English accent.",
+        42,
+        "fixed",
+        2.0,
+        10,
+        0.25,
+        0.0,
+        250,
+        true
+      ],
+      "widgets_values_named": {
+        "text": "Hello there. Take a moment, get comfortable, and let us begin.",
+        "task": "voice_design",
+        "task.style": "A warm, clear adult female voice with a relaxed conversational delivery and a neutral English accent.",
+        "seed": 42,
+        "control_after_generate": "fixed",
+        "cfg": 2.0,
+        "flow_steps": 10,
+        "sigma": 0.25,
+        "temperature": 0.0,
+        "max_steps": 250,
+        "trim": true
+      }
+    },
+    {
+      "id": 5,
+      "type": "SaveAudioAdvanced",
+      "title": "Preview and save FLAC",
+      "pos": [
+        1570,
+        0
+      ],
+      "size": [
+        340,
+        320
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveAudioAdvanced",
+        "cnr_id": "comfy-core",
+        "ver": "0.42.0"
+      },
+      "widgets_values": [
+        "ming_tts/02_voice_design",
+        "flac"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "ming_tts/02_voice_design",
+        "format": "flac"
+      }
+    }
+  ],
+  "links": [
+    [
+      1,
+      3,
+      0,
+      4,
+      0,
+      "MING_TTS_MODEL"
+    ],
+    [
+      2,
+      4,
+      0,
+      5,
+      0,
+      "AUDIO"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.65,
+      "offset": [
+        40,
+        40
+      ]
+    }
+  },
+  "version": 0.4
+}

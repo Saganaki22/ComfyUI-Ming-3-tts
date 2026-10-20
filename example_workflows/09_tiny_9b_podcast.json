@@ -1,0 +1,599 @@
+{
+  "id": "ba8354cb-21b7-53a8-bd5b-2105902ff25c",
+  "revision": 0,
+  "last_node_id": 11,
+  "last_link_id": 10,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "MarkdownNote",
+      "title": "Workflow guide",
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        520,
+        780
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "# Tiny 9B two-speaker podcast\n\n[Custom node](https://github.com/Saganaki22/ComfyUI-Ming-3-tts) · [Model files](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/tree/main/checkpoints)\n\n**Requires Tiny 9B. The 0.5B model does not support native podcast dialogue.**\n\n1. Upload one clean recording for **Alice** and a different recording for **Bob**.\n2. Each Whisper node transcribes its own recording; the transcript feeds the matching Podcast Speaker.\n3. Keep the names unique and match them exactly in `Alice: speech` / `Bob: speech` lines.\n4. Queue after selecting/downloading Tiny and Whisper. Use distinct reference voices with accurate transcripts.\n\nFor manual transcripts, disconnect each Speaker's `text` input and type the exact words from that speaker's recording. Add more Podcast Speaker nodes through the growing `speakers` sockets if needed. `max_steps=500` allows about 40 seconds at most; it does not force that length.\n\n## Generation settings\n- **seed 42 / fixed** keeps the seed unchanged between runs.\n- **cfg 2** controls guidance. **flow_steps 10** sets solver work per chunk.\n- **temperature 0** disables extra stochastic flow noise; `sigma` matters when temperature is above zero.\n- **max_steps 500** caps audio chunks at about 40 seconds; the model can stop earlier. It does not set speaking speed or force a duration.\n- **trim** removes trailing quiet audio. The terminal shows chunk progress, it/s and generation time.\n- **Save Audio** previews the result and writes FLAC under `ComfyUI/output/ming_tts/`.\n"
+      ],
+      "widgets_values_named": {
+        "text": "# Tiny 9B two-speaker podcast\n\n[Custom node](https://github.com/Saganaki22/ComfyUI-Ming-3-tts) · [Model files](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/tree/main/checkpoints)\n\n**Requires Tiny 9B. The 0.5B model does not support native podcast dialogue.**\n\n1. Upload one clean recording for **Alice** and a different recording for **Bob**.\n2. Each Whisper node transcribes its own recording; the transcript feeds the matching Podcast Speaker.\n3. Keep the names unique and match them exactly in `Alice: speech` / `Bob: speech` lines.\n4. Queue after selecting/downloading Tiny and Whisper. Use distinct reference voices with accurate transcripts.\n\nFor manual transcripts, disconnect each Speaker's `text` input and type the exact words from that speaker's recording. Add more Podcast Speaker nodes through the growing `speakers` sockets if needed. `max_steps=500` allows about 40 seconds at most; it does not force that length.\n\n## Generation settings\n- **seed 42 / fixed** keeps the seed unchanged between runs.\n- **cfg 2** controls guidance. **flow_steps 10** sets solver work per chunk.\n- **temperature 0** disables extra stochastic flow noise; `sigma` matters when temperature is above zero.\n- **max_steps 500** caps audio chunks at about 40 seconds; the model can stop earlier. It does not set speaking speed or force a duration.\n- **trim** removes trailing quiet audio. The terminal shows chunk progress, it/s and generation time.\n- **Save Audio** previews the result and writes FLAC under `ComfyUI/output/ming_tts/`.\n"
+      },
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 2,
+      "type": "MarkdownNote",
+      "title": "Model files and setup",
+      "pos": [
+        0,
+        820
+      ],
+      "size": [
+        520,
+        1120
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "## Ming model downloads\n\n- [Ming-3.0-tts-0.5b](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/resolve/main/checkpoints/Ming-3.0-tts-0.5b/model.safetensors?download=true)\n- [Ming-3.0-tts-0.5b-int8-convrot](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/resolve/main/checkpoints/Ming-3.0-tts-0.5b-int8-convrot/ming-3-tts-0.5b-int8-convrot.safetensors?download=true)\n- [Ming-3.0-tts-tiny-9b](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/resolve/main/checkpoints/Ming-3.0-tts-tiny-9b/ming-3-tts-tiny-9b.safetensors?download=true)\n- [Ming-3.0-tts-tiny-9b-int8-convrot](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/resolve/main/checkpoints/Ming-3.0-tts-tiny-9b-int8-convrot/ming-3-tts-tiny-9b-int8-convrot.safetensors?download=true)\n\n## Model folders\nPlace each selected weight in its matching folder:\n```\nComfyUI/models/checkpoints/\n├── Ming-3.0-tts-0.5b/model.safetensors\n├── Ming-3.0-tts-0.5b-int8-convrot/\n│   └── ming-3-tts-0.5b-int8-convrot.safetensors\n├── Ming-3.0-tts-tiny-9b/\n│   └── ming-3-tts-tiny-9b.safetensors\n└── Ming-3.0-tts-tiny-9b-int8-convrot/\n    └── ming-3-tts-tiny-9b-int8-convrot.safetensors\n```\nOnly the chosen model is needed. Keep this custom node's bundled `assets` folder installed; it supplies config/tokenizer files and CampPlus.\n\n**download_if_missing** is off initially. Enable it to authorize downloading the selected missing model. Existing local models, registered extra paths, symlinks and junctions work.\n\n**0.5B** is the smaller option. **Tiny 9B** is required for native podcast dialogue. INT8 reduces weight storage and memory; it is not a guaranteed speedup. Precision controls computation, not the saved weight format. `auto` follows ComfyUI's device/dtype selection.\n\nTiny uses optional FLA kernels on compatible CUDA systems, otherwise the slower PyTorch fallback. The terminal reports the backend used. Output is mono 44.1 kHz.\n\n## Whisper reference transcripts\n- Whisper is local speech recognition, not the speech generator.\n- Select a recording in **Load Audio**. `language=auto` detects its spoken language.\n- Default: `large-v3-turbo`, `precision=auto`, `device=auto`.\n- Put a complete [OpenAI Whisper large-v3-turbo](https://huggingface.co/openai/whisper-large-v3-turbo) folder in `ComfyUI/models/whisper/large-v3-turbo/`, or enable Whisper's `download_if_missing` to fetch only that selected model.\n- Other choices: large-v3, medium, small, base and tiny. Smaller models use less memory.\n- Whisper unloads after transcription. Review recognition errors, especially names and numbers.\n"
+      ],
+      "widgets_values_named": {
+        "text": "## Ming model downloads\n\n- [Ming-3.0-tts-0.5b](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/resolve/main/checkpoints/Ming-3.0-tts-0.5b/model.safetensors?download=true)\n- [Ming-3.0-tts-0.5b-int8-convrot](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/resolve/main/checkpoints/Ming-3.0-tts-0.5b-int8-convrot/ming-3-tts-0.5b-int8-convrot.safetensors?download=true)\n- [Ming-3.0-tts-tiny-9b](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/resolve/main/checkpoints/Ming-3.0-tts-tiny-9b/ming-3-tts-tiny-9b.safetensors?download=true)\n- [Ming-3.0-tts-tiny-9b-int8-convrot](https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI/resolve/main/checkpoints/Ming-3.0-tts-tiny-9b-int8-convrot/ming-3-tts-tiny-9b-int8-convrot.safetensors?download=true)\n\n## Model folders\nPlace each selected weight in its matching folder:\n```\nComfyUI/models/checkpoints/\n├── Ming-3.0-tts-0.5b/model.safetensors\n├── Ming-3.0-tts-0.5b-int8-convrot/\n│   └── ming-3-tts-0.5b-int8-convrot.safetensors\n├── Ming-3.0-tts-tiny-9b/\n│   └── ming-3-tts-tiny-9b.safetensors\n└── Ming-3.0-tts-tiny-9b-int8-convrot/\n    └── ming-3-tts-tiny-9b-int8-convrot.safetensors\n```\nOnly the chosen model is needed. Keep this custom node's bundled `assets` folder installed; it supplies config/tokenizer files and CampPlus.\n\n**download_if_missing** is off initially. Enable it to authorize downloading the selected missing model. Existing local models, registered extra paths, symlinks and junctions work.\n\n**0.5B** is the smaller option. **Tiny 9B** is required for native podcast dialogue. INT8 reduces weight storage and memory; it is not a guaranteed speedup. Precision controls computation, not the saved weight format. `auto` follows ComfyUI's device/dtype selection.\n\nTiny uses optional FLA kernels on compatible CUDA systems, otherwise the slower PyTorch fallback. The terminal reports the backend used. Output is mono 44.1 kHz.\n\n## Whisper reference transcripts\n- Whisper is local speech recognition, not the speech generator.\n- Select a recording in **Load Audio**. `language=auto` detects its spoken language.\n- Default: `large-v3-turbo`, `precision=auto`, `device=auto`.\n- Put a complete [OpenAI Whisper large-v3-turbo](https://huggingface.co/openai/whisper-large-v3-turbo) folder in `ComfyUI/models/whisper/large-v3-turbo/`, or enable Whisper's `download_if_missing` to fetch only that selected model.\n- Other choices: large-v3, medium, small, base and tiny. Smaller models use less memory.\n- Whisper unloads after transcription. Review recognition errors, especially names and numbers.\n"
+      },
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 3,
+      "type": "MingLoadModel",
+      "title": "Load Tiny 9B INT8",
+      "pos": [
+        600,
+        0
+      ],
+      "size": [
+        340,
+        190
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MING_TTS_MODEL",
+          "type": "MING_TTS_MODEL",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MingLoadModel",
+        "cnr_id": "comfyui-ming-3-tts",
+        "ver": "1.0.0"
+      },
+      "widgets_values": [
+        "Ming-3.0-tts-tiny-9b-int8-convrot",
+        "auto",
+        "auto",
+        false
+      ],
+      "widgets_values_named": {
+        "model": "Ming-3.0-tts-tiny-9b-int8-convrot",
+        "precision": "auto",
+        "device": "auto",
+        "download_if_missing": false
+      }
+    },
+    {
+      "id": 4,
+      "type": "MingPodcast",
+      "title": "Tiny 9B dialogue",
+      "pos": [
+        1820,
+        0
+      ],
+      "size": [
+        500,
+        720
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MING_TTS_MODEL",
+          "link": 1
+        },
+        {
+          "name": "speakers.speaker0",
+          "type": "MING_TTS_SPEAKER",
+          "link": 5
+        },
+        {
+          "name": "speakers.speaker1",
+          "type": "MING_TTS_SPEAKER",
+          "link": 9
+        }
+      ],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            10
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MingPodcast",
+        "cnr_id": "comfyui-ming-3-tts",
+        "ver": "1.0.0"
+      },
+      "widgets_values": [
+        "Alice: Hello, and welcome to our conversation.\nBob: Thanks, Alice. What are we talking about today?\nAlice: How to turn a short voice recording into a new story.",
+        42,
+        "fixed",
+        2.0,
+        10,
+        0.25,
+        0.0,
+        500,
+        true
+      ],
+      "widgets_values_named": {
+        "text": "Alice: Hello, and welcome to our conversation.\nBob: Thanks, Alice. What are we talking about today?\nAlice: How to turn a short voice recording into a new story.",
+        "seed": 42,
+        "control_after_generate": "fixed",
+        "cfg": 2.0,
+        "flow_steps": 10,
+        "sigma": 0.25,
+        "temperature": 0.0,
+        "max_steps": 500,
+        "trim": true
+      }
+    },
+    {
+      "id": 5,
+      "type": "LoadAudio",
+      "title": "Upload Alice's reference recording",
+      "pos": [
+        600,
+        350
+      ],
+      "size": [
+        340,
+        170
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            2,
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadAudio",
+        "cnr_id": "comfy-core",
+        "ver": "0.42.0"
+      },
+      "widgets_values": [
+        "",
+        ""
+      ],
+      "widgets_values_named": {
+        "audio": "",
+        "upload": ""
+      }
+    },
+    {
+      "id": 6,
+      "type": "MingWhisperTranscribe",
+      "title": "Transcribe Alice's reference",
+      "pos": [
+        1000,
+        350
+      ],
+      "size": [
+        340,
+        300
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "transcript",
+          "type": "STRING",
+          "links": [
+            4
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MingWhisperTranscribe",
+        "cnr_id": "comfyui-ming-3-tts",
+        "ver": "1.0.0"
+      },
+      "widgets_values": [
+        "large-v3-turbo",
+        "auto",
+        "auto",
+        "auto",
+        false
+      ],
+      "widgets_values_named": {
+        "model": "large-v3-turbo",
+        "language": "auto",
+        "precision": "auto",
+        "device": "auto",
+        "download_if_missing": false
+      }
+    },
+    {
+      "id": 7,
+      "type": "MingReferenceSpeaker",
+      "title": "Speaker: Alice",
+      "pos": [
+        1400,
+        350
+      ],
+      "size": [
+        340,
+        320
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 3
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 4,
+          "widget": {
+            "name": "text"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MING_TTS_SPEAKER",
+          "type": "MING_TTS_SPEAKER",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MingReferenceSpeaker",
+        "cnr_id": "comfyui-ming-3-tts",
+        "ver": "1.0.0"
+      },
+      "widgets_values": [
+        "Alice",
+        ""
+      ],
+      "widgets_values_named": {
+        "name": "Alice",
+        "text": ""
+      }
+    },
+    {
+      "id": 8,
+      "type": "LoadAudio",
+      "title": "Upload Bob's reference recording",
+      "pos": [
+        600,
+        850
+      ],
+      "size": [
+        340,
+        170
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            6,
+            7
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadAudio",
+        "cnr_id": "comfy-core",
+        "ver": "0.42.0"
+      },
+      "widgets_values": [
+        "",
+        ""
+      ],
+      "widgets_values_named": {
+        "audio": "",
+        "upload": ""
+      }
+    },
+    {
+      "id": 9,
+      "type": "MingWhisperTranscribe",
+      "title": "Transcribe Bob's reference",
+      "pos": [
+        1000,
+        850
+      ],
+      "size": [
+        340,
+        300
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 6
+        }
+      ],
+      "outputs": [
+        {
+          "name": "transcript",
+          "type": "STRING",
+          "links": [
+            8
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MingWhisperTranscribe",
+        "cnr_id": "comfyui-ming-3-tts",
+        "ver": "1.0.0"
+      },
+      "widgets_values": [
+        "large-v3-turbo",
+        "auto",
+        "auto",
+        "auto",
+        false
+      ],
+      "widgets_values_named": {
+        "model": "large-v3-turbo",
+        "language": "auto",
+        "precision": "auto",
+        "device": "auto",
+        "download_if_missing": false
+      }
+    },
+    {
+      "id": 10,
+      "type": "MingReferenceSpeaker",
+      "title": "Speaker: Bob",
+      "pos": [
+        1400,
+        850
+      ],
+      "size": [
+        340,
+        320
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 7
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 8,
+          "widget": {
+            "name": "text"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MING_TTS_SPEAKER",
+          "type": "MING_TTS_SPEAKER",
+          "links": [
+            9
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MingReferenceSpeaker",
+        "cnr_id": "comfyui-ming-3-tts",
+        "ver": "1.0.0"
+      },
+      "widgets_values": [
+        "Bob",
+        ""
+      ],
+      "widgets_values_named": {
+        "name": "Bob",
+        "text": ""
+      }
+    },
+    {
+      "id": 11,
+      "type": "SaveAudioAdvanced",
+      "title": "Preview and save FLAC",
+      "pos": [
+        2400,
+        0
+      ],
+      "size": [
+        340,
+        320
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 10
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveAudioAdvanced",
+        "cnr_id": "comfy-core",
+        "ver": "0.42.0"
+      },
+      "widgets_values": [
+        "ming_tts/09_tiny_9b_podcast",
+        "flac"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "ming_tts/09_tiny_9b_podcast",
+        "format": "flac"
+      }
+    }
+  ],
+  "links": [
+    [
+      1,
+      3,
+      0,
+      4,
+      0,
+      "MING_TTS_MODEL"
+    ],
+    [
+      2,
+      5,
+      0,
+      6,
+      0,
+      "AUDIO"
+    ],
+    [
+      3,
+      5,
+      0,
+      7,
+      0,
+      "AUDIO"
+    ],
+    [
+      4,
+      6,
+      0,
+      7,
+      1,
+      "STRING"
+    ],
+    [
+      5,
+      7,
+      0,
+      4,
+      1,
+      "MING_TTS_SPEAKER"
+    ],
+    [
+      6,
+      8,
+      0,
+      9,
+      0,
+      "AUDIO"
+    ],
+    [
+      7,
+      8,
+      0,
+      10,
+      0,
+      "AUDIO"
+    ],
+    [
+      8,
+      9,
+      0,
+      10,
+      1,
+      "STRING"
+    ],
+    [
+      9,
+      10,
+      0,
+      4,
+      2,
+      "MING_TTS_SPEAKER"
+    ],
+    [
+      10,
+      4,
+      0,
+      11,
+      0,
+      "AUDIO"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.65,
+      "offset": [
+        40,
+        40
+      ]
+    }
+  },
+  "version": 0.4
+}

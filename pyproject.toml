@@ -1,0 +1,22 @@
+[project]
+name = "comfyui-ming-3-tts"
+version = "1.0.0"
+description = "Native ComfyUI Ming 3 TTS nodes with INT8 ConvRot and local Whisper transcription."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = ["onnxruntime", "tqdm"]
+
+[project.optional-dependencies]
+fla = ["fla-core==0.4.2"]
+
+[project.urls]
+Repository = "https://github.com/Saganaki22/ComfyUI-Ming-3-tts"
+Issues = "https://github.com/Saganaki22/ComfyUI-Ming-3-tts/issues"
+Model = "https://huggingface.co/drbaph/Ming-3.0-tts-ComfyUI"
+Upstream = "https://github.com/inclusionAI/Ming-3.0-tts"
+
+[tool.comfy]
+PublisherId = "saganaki22"
+DisplayName = "Ming 3 TTS"
+Icon = "https://avatars.githubusercontent.com/u/84208527"

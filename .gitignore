@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.upstream/
+.research/
+test_outputs/
+/tests/
+/tools/
+/RELEASE_NOTES.md
+/PLAN.md

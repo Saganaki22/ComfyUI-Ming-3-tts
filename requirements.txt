@@ -1,0 +1,6 @@
+# Use ComfyUI's torch, torchaudio, transformers, safetensors and comfy-kitchen.
+onnxruntime
+tqdm
+# Optional Tiny CUDA kernels (requires working Triton):
+# python -m pip install --no-deps fla-core==0.4.2
+# Also declared as the optional 'fla' extra in pyproject.toml.
