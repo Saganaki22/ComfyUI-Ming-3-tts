@@ -16,6 +16,7 @@ import comfy.utils
 
 from .prompts import build_prompt, podcast_text
 from .tiny import chunk_kda
+from .text_segment import cut_text_by_semantic_length
 
 
 def mono_audio(audio):
@@ -111,59 +112,64 @@ def synthesize(bundle, text, task, values, seed=42, cfg=2.0, flow_steps=10, sigm
                 reference_text = references[0]["text"]
             if task == "podcast":
                 text, reference_text = podcast_text(text, references)
-            ids, positions = build_prompt(bundle.tokenizer, config, task, text, values, len(references), 0 if prompt_hidden is None else prompt_hidden.shape[1], reference_text)
-            token_ids = torch.tensor([ids], device=device, dtype=torch.long)
-            backbone = model.model.model
-            embedding = backbone.word_embeddings if bundle.tiny else backbone.embed_tokens
-            current = embedding(token_ids)
-            if speakers is None:
-                for position in positions:
-                    current[:, position] = 0
-            else:
-                projected = model.spk_head(speakers.to(device=device, dtype=dtype))
-                for i, position in enumerate(positions):
-                    current[:, position] = projected[i]
-            if prompt_hidden is not None:
-                current[:, -prompt_hidden.shape[1]:] = prompt_hidden
-            history = torch.zeros((1, history_size, latent_dim), device=device, dtype=torch.float32 if bundle.tiny else dtype)
-            if prompt_latent is not None:
-                take = min(history_size, prompt_latent.shape[1])
-                history[:, -take:] = prompt_latent[:, -take:]
-            cache = [[] for _ in backbone.layers]
-            generated, offset = [], 0
-            budget = max_steps
-            minimum = config["tts_config"]["minimum_decode_steps"] if bundle.tiny else 5
-            if task == "podcast":
-                minimum = 0
-                for line in text.splitlines():
-                    content = line.split(":", 1)[1].strip()
-                    minimum += len(content.split()) if content.isascii() else len(content)
-                minimum = max(8, min(max_steps, minimum))
-            progress = comfy.utils.ProgressBar(budget)
-            label = "Ming Tiny decode" if bundle.tiny else "Ming 0.5B decode"
-            with tqdm(total=budget, desc=label, unit="it", dynamic_ncols=True, leave=True) as cli_progress:
-                for step in range(budget):
-                    mm.throw_exception_if_processing_interrupted()
-                    length = current.shape[1]
-                    hidden = backbone(current, cache, options, offset=offset) if bundle.tiny else backbone(current, cache, options)
-                    hidden = hidden[:, -1:]
-                    sampled = model.flowloss.sample(hidden, history, patch_size, cfg, sigma, temperature, flow_steps, bundle.tiny, options)
-                    generated.append(sampled)
-                    offset += length
-                    current = model.linear_proj_audio(sampled, options)
-                    history = torch.cat((history, sampled), dim=1)[:, -history_size:].clone()
-                    progress.update(1)
-                    cli_progress.update(1)
-                    stop = model.stop_head(hidden).softmax(dim=-1)[0, 0, 1]
-                    if step + 1 >= minimum and stop > 0.5:
-                        break
-                cli_progress.total = len(generated)
-            latents = torch.cat(generated, dim=1)
-            waveform = model.audio.decoder(latents, options).float().cpu()
+            # Like the official runtime, decode long text in fragments of about 50 characters; voice design, freeform and
+            # podcast prompts describe the whole utterance and stay in one piece.
+            fragments = [text] if task in ("voice_design", "freeform", "podcast") else cut_text_by_semantic_length(text.strip(), 50)["fragments"] or [text]
+            pieces = []
+            for fragment in fragments:
+                ids, positions = build_prompt(bundle.tokenizer, config, task, fragment, values, len(references), 0 if prompt_hidden is None else prompt_hidden.shape[1], reference_text)
+                token_ids = torch.tensor([ids], device=device, dtype=torch.long)
+                backbone = model.model.model
+                embedding = backbone.word_embeddings if bundle.tiny else backbone.embed_tokens
+                current = embedding(token_ids)
+                if speakers is None:
+                    for position in positions:
+                        current[:, position] = 0
+                else:
+                    projected = model.spk_head(speakers.to(device=device, dtype=dtype))
+                    for i, position in enumerate(positions):
+                        current[:, position] = projected[i]
+                if prompt_hidden is not None:
+                    current[:, -prompt_hidden.shape[1]:] = prompt_hidden
+                history = torch.zeros((1, history_size, latent_dim), device=device, dtype=torch.float32 if bundle.tiny else dtype)
+                if prompt_latent is not None:
+                    take = min(history_size, prompt_latent.shape[1])
+                    history[:, -take:] = prompt_latent[:, -take:]
+                cache = [[] for _ in backbone.layers]
+                generated, offset = [], 0
+                budget = max_steps
+                minimum = config["tts_config"]["minimum_decode_steps"] if bundle.tiny else 5
+                if task == "podcast":
+                    minimum = 0
+                    for line in text.splitlines():
+                        content = line.split(":", 1)[1].strip()
+                        minimum += len(content.split()) if content.isascii() else len(content)
+                    minimum = max(8, min(max_steps, minimum))
+                progress = comfy.utils.ProgressBar(budget)
+                label = "Ming Tiny decode" if bundle.tiny else "Ming 0.5B decode"
+                with tqdm(total=budget, desc=label, unit="it", dynamic_ncols=True, leave=True) as cli_progress:
+                    for step in range(budget):
+                        mm.throw_exception_if_processing_interrupted()
+                        length = current.shape[1]
+                        hidden = backbone(current, cache, options, offset=offset) if bundle.tiny else backbone(current, cache, options)
+                        hidden = hidden[:, -1:]
+                        sampled = model.flowloss.sample(hidden, history, patch_size, cfg, sigma, temperature, flow_steps, bundle.tiny, options)
+                        generated.append(sampled)
+                        offset += length
+                        current = model.linear_proj_audio(sampled, options)
+                        history = torch.cat((history, sampled), dim=1)[:, -history_size:].clone()
+                        progress.update(1)
+                        cli_progress.update(1)
+                        stop = model.stop_head(hidden).softmax(dim=-1)[0, 0, 1]
+                        if step + 1 >= minimum and stop > 0.5:
+                            break
+                    cli_progress.total = len(generated)
+                latents = torch.cat(generated, dim=1)
+                waveform = model.audio.decoder(latents, options).float().cpu()
+                pieces.append(trim_silence(waveform, sample_rate) if trim else waveform)
+            waveform = torch.cat(pieces, dim=-1)
     if not torch.isfinite(waveform).all():
         raise FloatingPointError("Ming produced non-finite audio. Check the model weights and compute dtype.")
-    if trim:
-        waveform = trim_silence(waveform, sample_rate)
     elapsed = time.perf_counter() - started
     duration = waveform.shape[-1] / sample_rate
     logging.info("Ming TTS: %.2fs audio, %.2fs generation, RTF %.2f", duration, elapsed, elapsed / duration)

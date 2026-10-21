@@ -210,10 +210,12 @@ Use a Tiny model and increase `max_steps` when a longer conversation reaches the
 | `flow_steps` | 10 | Flow-matching solver steps for each generated audio chunk |
 | `temperature` | 0.0 | Stochastic flow sampling control |
 | `sigma` | 0.25 | Flow noise scale; advanced input |
-| `max_steps` | 250 | Maximum generated audio chunks, about 20 seconds |
+| `max_steps` | 250 | Maximum generated audio chunks per text fragment, about 20 seconds |
 | `trim` | true | Trim trailing silence after generation |
 
 One decoding iteration generates approximately 80 ms of audio. The model can stop before `max_steps`; this is a ceiling, not a requested duration or speaking-speed setting. A cap of 125 is approximately 10 seconds and can cut off a sentence. Increasing the cap allows more speech but does not stretch or slow an already completed sentence.
+
+As in the official runtime, longer text is split into fragments of about 50 Chinese or Japanese characters or English words and the fragments are generated one after another, each with its own `max_steps` and trailing-silence trim. Voice design, freeform and podcast text stays in one piece.
 
 The terminal shows a persistent progress bar with elapsed time and audio chunks per second.
 
