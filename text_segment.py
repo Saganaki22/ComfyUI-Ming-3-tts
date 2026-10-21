@@ -1,5 +1,5 @@
 # inclusionAI/Ming-3.0-tts frontend/text_segment_cut.py (upstream revision in NOTICE.md), unchanged except that
-# get_semantic_length also counts Japanese kana, proposed upstream in inclusionAI/Ming-3.0-tts#4.
+# get_semantic_length also counts Japanese kana and Korean Hangul, proposed upstream in inclusionAI/Ming-3.0-tts#4.
 
 import re
 import string
@@ -69,14 +69,15 @@ def split_and_group_sentences(text, group_by_lang=False):
 def get_semantic_length(text):
     """
     计算字符串的语义长度。
-    一个汉字或一个日文假名计为1，一个连续的英文字母串（单词）计为1。
+    一个汉字、一个日文假名或一个韩文音节计为1，一个连续的英文字母串（单词）计为1。
     """
     chinese_char_count = len(re.findall(r'[\u4e00-\u9fa5]', text))
-    # Japanese kana (hiragana, katakana) count like hanzi; otherwise Japanese fragments come out about three times longer.
-    kana_count = len(re.findall(r'[\u3040-\u30ff]', text))
+    # Japanese kana (hiragana, katakana) and Korean Hangul syllables count like hanzi; otherwise Japanese fragments come out
+    # about three times longer and Korean text is never split.
+    kana_hangul_count = len(re.findall(r'[\u3040-\u30ff\uac00-\ud7a3]', text))
     # [a-zA-Z]+ 匹配一个或多个连续的英文字母
     english_word_count = len(re.findall(r'[a-zA-Z]+', text))
-    return chinese_char_count + kana_count + english_word_count
+    return chinese_char_count + kana_hangul_count + english_word_count
     
 def has_valid_content(text):
     """

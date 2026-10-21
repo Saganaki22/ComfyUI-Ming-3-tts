@@ -215,7 +215,7 @@ Use a Tiny model and increase `max_steps` when a longer conversation reaches the
 
 One decoding iteration generates approximately 80 ms of audio. The model can stop before `max_steps`; this is a ceiling, not a requested duration or speaking-speed setting. A cap of 125 is approximately 10 seconds and can cut off a sentence. Increasing the cap allows more speech but does not stretch or slow an already completed sentence.
 
-As in the official runtime, longer text is split into fragments of about 50 Chinese or Japanese characters or English words and the fragments are generated one after another, each with its own `max_steps` and trailing-silence trim. Voice design, freeform and podcast text stays in one piece.
+As in the official runtime, longer text is split into fragments of about 50 Chinese, Japanese or Korean characters or English words and the fragments are generated one after another, each with its own `max_steps` and trailing-silence trim. Voice design, freeform and podcast text stays in one piece.
 
 The terminal shows a persistent progress bar with elapsed time and audio chunks per second.
 
