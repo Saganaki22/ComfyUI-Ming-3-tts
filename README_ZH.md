@@ -229,12 +229,14 @@ Alice: How to make a clear reference recording.
 | `flow_steps` | 10 | 每个音频块的 flow 求解步骤。 |
 | `temperature` | 0.0 | 额外随机 flow 噪声，0 时关闭。 |
 | `sigma` | 0.25 | temperature 大于 0 时的额外噪声缩放。 |
-| `max_steps` | 250 | 音频块数量上限，约 20 秒；模型可提前结束。 |
+| `max_steps` | 250 | 每个文本片段的音频块上限，约 20 秒；voice_design、freeform 和 podcast 为整个输入的上限。 |
 | `trim` | true | 裁剪结尾静音，不改变语速。 |
 
 一次解码迭代约生成 80 ms 音频，125 个块约为 10 秒。`max_steps` 只设置上限，不能强制精确时长，也不能把已经完成的句子拉长或减速。若要明确控制语速，请使用 `basic` 的 speed。
 
-终端显示保留的进度条、耗时和每秒生成块数。结束时报告音频时长、生成耗时和 RTF；RTF 小于 1 表示快于实时，生成耗时不包括模型加载。
+较长的 clone、`ip`、`basic`、`emotion` 和 `dialect` 文本会优先按句子或分句边界拆分，每段不超过 50 个中日韩字符或单词，副语言标签保持完整。每段独立使用 `max_steps` 上限并裁剪结尾静音，然后拼接音频。voice_design、freeform 和 podcast 保持完整，不拆分。
+
+终端显示保留的进度条、耗时和每秒生成块数；拆分文本时还会显示片段编号。结束时报告音频时长、生成耗时和 RTF；RTF 小于 1 表示快于实时，生成耗时不包括模型加载。
 
 ## INT8 ConvRot
 

@@ -210,12 +210,14 @@ Use a Tiny model and increase `max_steps` when a longer conversation reaches the
 | `flow_steps` | 10 | Flow-matching solver steps for each generated audio chunk |
 | `temperature` | 0.0 | Stochastic flow sampling control |
 | `sigma` | 0.25 | Flow noise scale; advanced input |
-| `max_steps` | 250 | Maximum generated audio chunks, about 20 seconds |
+| `max_steps` | 250 | Maximum audio chunks per fragment, about 20 seconds; one limit for voice design, freeform and podcast |
 | `trim` | true | Trim trailing silence after generation |
 
 One decoding iteration generates approximately 80 ms of audio. The model can stop before `max_steps`; this is a ceiling, not a requested duration or speaking-speed setting. A cap of 125 is approximately 10 seconds and can cut off a sentence. Increasing the cap allows more speech but does not stretch or slow an already completed sentence.
 
-The terminal shows a persistent progress bar with elapsed time and audio chunks per second.
+Long clone, `ip`, `basic`, `emotion` and `dialect` text is split at sentence or clause boundaries where possible, into at most 50 Chinese/Japanese/Korean characters or words. Vocal tags stay intact. Each fragment gets its own `max_steps` limit and silence trim before the audio is joined. Voice design, freeform and podcast stay in one piece.
+
+The terminal shows a persistent progress bar with elapsed time and audio chunks per second, plus the fragment number for split text.
 
 The final summary reports audio duration, generation time and real-time factor (RTF). RTF below 1 means faster than real time; model loading is excluded.
 

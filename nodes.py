@@ -16,7 +16,7 @@ def sampling_inputs(seed=42):
         io.Int.Input("flow_steps", default=10, min=1, max=100, tooltip="Flow solver evaluations per audio chunk. Default 10. More steps increase generation time and may change quality; this does not set audio duration."),
         io.Float.Input("sigma", default=0.25, min=0, max=10, step=0.01, advanced=True, tooltip="Scale of extra flow noise when temperature is above zero. Default 0.25; has no effect at temperature 0."),
         io.Float.Input("temperature", default=0.0, min=0, max=10, step=0.05, tooltip="Extra stochastic noise during flow sampling. At 0, only the initial latent noise is sampled. Higher values change variation and may reduce clarity."),
-        io.Int.Input("max_steps", default=250, min=1, max=10000, tooltip="Maximum audio chunks, about 80 ms each: 125 is about 10 seconds. The model may finish earlier; this does not slow speech or force an exact duration.", advanced=True),
+        io.Int.Input("max_steps", default=250, min=1, max=10000, tooltip="Maximum audio chunks per text fragment, about 80 ms each: 125 is about 10 seconds. Long clone, ip, basic, emotion and dialect text is split automatically. Voice design, freeform and podcast use one limit for the whole input. The model may stop earlier; this does not set speaking speed or force a duration.", advanced=True),
         io.Boolean.Input("trim", default=True, display_name="trim trailing silence", tooltip="Remove trailing quiet audio, retaining a short tail. Does not change speaking speed."),
     ]
 
